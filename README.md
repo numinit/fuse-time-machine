@@ -26,7 +26,7 @@ tested.
 Assuming that you're running as the same uid as you had on your mac,
 doing:
 
-```
+```sh
 python fuse-tm.py <mountpoint> --hfs-path=<hfs-path> --hostname=<hostname>
 ```
 
@@ -34,6 +34,12 @@ should do it. mountpoint is the folder that you want FUSE to mount on.
 hfs_path is the path to your mounted time machine. hostname is the hostname of
 the Mac that you're restoring. You can then interact with mountpoint as if it
 were your time machine on your mac.
+
+Use `--backups-dir=foo` to use a different backup directory than
+`Backups.backupdb`, which is the default.
+
+If you want to mount a different revision than `Latest`, use `--revision-name`,
+e.g. `--revision-name=2012-09-23-214107`.
 
 ## Limitations ##
 

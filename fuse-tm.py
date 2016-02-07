@@ -137,18 +137,22 @@ class TimeMachineFS(fuse.Fuse):
 
         # Now check that self.hostname is an actual hostname in the mountpoint and
         # has a Latest dir to restore
-        path_to_hd = os.path.join(self.hfs_path, "Backups.backupdb", self.hostname, "Latest")
+        path_to_hd = os.path.join(self.hfs_path, self.backups_directory, self.hostname, self.revision_name)
         try:
             os.stat(path_to_hd)
         except OSError:
             return False
 
-        # Note that Latest is a symlink to another directory. Since
-        # we're programmed to not follow symlinks, we need to evaluate
-        # that before we set it as the basedir.
-        target = os.readlink(path_to_hd)
-        path_to, latest = os.path.split(path_to_hd)
-        path_to_hd = os.path.join(path_to, target)
+        try:
+            # Note that Latest is a symlink to another directory. Since
+            # we're programmed to not follow symlinks, we need to evaluate
+            # that before we set it as the basedir.
+            target = os.readlink(path_to_hd)
+            path_to, latest = os.path.split(path_to_hd)
+            path_to_hd = os.path.join(path_to, target)
+        except OSError:
+            # Probably an actual directory, rather than a symlink.
+            pass
 
         self.basedir = path_to_hd
 
@@ -173,6 +177,10 @@ class TimeMachineFS(fuse.Fuse):
 if __name__=="__main__":
     fs = TimeMachineFS(version="%prog " + fuse.__version__,
                        usage="read-only FUSE interface to a time machine drive")
+    fs.parser.add_option("--backups-dir", help="Name of the backups directory (default: Backups.backupdb)",
+                         action='store', dest='backups_directory', default='Backups.backupdb', nargs=1)
+    fs.parser.add_option("--revision-name", help="Name of the desired revision (default: Latest)",
+                         action='store', dest='revision_name', default='Latest', nargs=1)
     fs.parser.add_option("--hfs-path", help="Path to mounted HFS+ filesystem",
                          action='store', dest='hfs_path', default=None, nargs=1)
     fs.parser.add_option("--hostname", help="Hostname of the system to be recovered",
